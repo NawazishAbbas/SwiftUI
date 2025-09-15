@@ -25,7 +25,7 @@ struct ContentView: View {
                         }
                     }
                     .listStyle(.plain)
-                    .navigationTitle("Users")
+                    .navigationTitle("Users List")
                 }
             }
             .onAppear(perform: vm.loadUsers)
