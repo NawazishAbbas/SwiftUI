@@ -26,17 +26,16 @@ class APIUserRepository: UserRepository {
     func fetchUsers(completion: @escaping([User]) -> Void) {
         hasError = false
         isRefreshing = true
-        let usersUrlString = "https://jsonplaceholder.typicode.com/users"
-        
-        AF.request(usersUrlString).responseDecodable(of: [User].self) { [weak self] response in
-            switch response.result {
-            case .success(let tempUsers):
-                completion(tempUsers)
-            case .failure(let error):
-                self?.hasError = true
-                self?.error = UserError.custom(error: error)
-            }
-        }
+        APIClient.shared.request(endpoint: .usersList, completion: completion)
+//        AF.request(usersUrlString).responseDecodable(of: [User].self) { [weak self] response in
+//            switch response.result {
+//            case .success(let tempUsers):
+//                completion(tempUsers)
+//            case .failure(let error):
+//                self?.hasError = true
+//                self?.error = UserError.custom(error: error)
+//            }
+//        }
     }
     
     func fetchUsersJSONDecoder(completion: @escaping([User]) -> Void) {
