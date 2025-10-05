@@ -6,5 +6,5 @@
 //
 
 protocol UserRepository {
-    func fetchUsers(completion: @escaping([User]) -> Void)
+    func fetchUsers() async throws -> [User]
 }
