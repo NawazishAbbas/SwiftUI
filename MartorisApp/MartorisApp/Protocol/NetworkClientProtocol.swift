@@ -6,8 +6,7 @@
 //
 
 import Foundation
-import Alamofire
 
 protocol NetworkClientProtocol {
-    func request<T: Decodable>(endpoint: Endpoint, completion: ((T) -> ())?)
+    func load<Response: Decodable>() async throws -> Response
 }

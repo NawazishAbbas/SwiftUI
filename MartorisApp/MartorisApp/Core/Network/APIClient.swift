@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import Alamofire
 
 enum Endpoint: String {
     case usersList = "https://jsonplaceholder.typicode.com/users"
@@ -15,12 +14,39 @@ enum Endpoint: String {
 class APIClient: NetworkClientProtocol
 {
     static let shared = APIClient()
+    var error: UserError?
     
-    func request<T: Decodable>(endpoint: Endpoint, completion: ((T) -> ())?) {
-        AF.request(endpoint.rawValue).responseDecodable(of: T.self) { response in
-            if response.response?.statusCode == 200, let value = response.value {
-                completion?(value)
+    func load<Response>() async throws -> Response where Response : Decodable {
+        
+        guard let url = URL(string: Endpoint.usersList.rawValue) else {
+            error = UserError.custom(error: URLError(.badURL))
+            throw UserError.custom(error: URLError(.badURL))
+        }
+        
+        do {
+            let (data, response) = try await URLSession.shared.data(from: url)
+            
+            // Optional: check for bad HTTP response
+            if let httpResponse = response as? HTTPURLResponse, !(200...299).contains(httpResponse.statusCode) {
+                if let _error = error {
+                    error = UserError.custom(error: _error)
+                }
             }
+            
+            let decoder = JSONDecoder()
+            decoder.keyDecodingStrategy = .convertFromSnakeCase
+            
+            do {
+                let users = try decoder.decode(Response.self, from: data)
+                return users
+            } catch {
+                self.error = .failedToDecode
+                throw UserError.failedToDecode
+            }
+            
+        } catch {
+            self.error = .custom(error: error)
+            throw error
         }
     }
 }
